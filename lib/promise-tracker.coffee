@@ -1,9 +1,9 @@
 _           = require 'underscore-plus'
-uuid        = require 'node-uuid'
+uuid        = require 'uuid'
 emitter     = require('./emitter').pubsub
 
 class PromiseTracker
-  
+
   # object containing promises we're tracking
   # {
   #   'tracked-promise-uuid' : {
@@ -53,7 +53,7 @@ class PromiseTracker
       return p
     else
       @tracked[promiseId]
-    
+
   completePromise: (result) ->
     tracker.tracked[result.promiseId].result = result
     tracker.tracked[result.promiseId].complete = true
