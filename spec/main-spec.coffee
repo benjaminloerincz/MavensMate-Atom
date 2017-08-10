@@ -14,10 +14,6 @@ describe 'main.coffee', ->
         workspaceElement = atom.views.getView(atom.workspace)
         jasmine.attachToDOM(workspaceElement)
 
-        pkg = atom.packages.loadPackage('MavensMate-Atom')
-        packageMain = pkg.mainModule
-        spyOn(packageMain, 'provide').andCallThrough()
-
     it 'should not have settings', ->
       expect(atom.config.get('MavensMate-Atom')).toBeUndefined()
 
@@ -73,7 +69,7 @@ describe 'main.coffee', ->
     it 'should attach commands', ->
       expect(helper.hasCommand(workspaceElement, 'mavensmate:new-project')).toBeTruthy()
       expect(helper.hasCommand(workspaceElement, 'mavensmate:open-project')).toBeTruthy()
-      expect(helper.hasCommand(workspaceElement, 'mavensmate:compile-project')).toBeFalsy()
+      expect(helper.hasCommand(workspaceElement, 'mavensmate:compile-project')).toBeTruthy()
 
     it 'calls newProject() method for mavensmate:new-project event', ->
       spyOn(mavensmate.mavensmateAdapter,'executeCommand').andCallFake ->
@@ -96,6 +92,7 @@ describe 'main.coffee', ->
     projectPath = null
 
     beforeEach ->
+      console.log("path clearing")
       atom.project.setPaths([''])
 
       workspaceElement = atom.views.getView(atom.workspace)
@@ -120,7 +117,18 @@ describe 'main.coffee', ->
   describe 'package deactivation', ->
 
     beforeEach ->
-      atom.packages.deactivatePackage 'MavensMate-Atom'
+
+      workspaceElement = atom.views.getView(atom.workspace)
+      jasmine.attachToDOM(workspaceElement)
+
+      activationPromise = atom.packages.activatePackage('MavensMate-Atom').then ({mainModule}) ->
+        mavensmate = mainModule.mavensmate
+
+      waitsForPromise ->
+        activationPromise
+
 
     it 'should deactivate package in Atom', ->
-      expect(atom.packages.activePackages['MavensMate-Atom']).toBeUndefined()
+      expect(atom.packages.isPackageActive('MavensMate-Atom')).toBeTruthy()
+      atom.packages.deactivatePackage 'MavensMate-Atom'
+      expect(atom.packages.isPackageActive('MavensMate-Atom')).toBeFalsy()

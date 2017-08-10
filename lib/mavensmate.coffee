@@ -63,7 +63,7 @@ module.exports =
         self.mavensmateAdapter.checkStatus()
           .then(() ->
             # TODO
-            if not atom.workspace.mavensMateProjectInitialized
+            if not self.mavensMateProjectInitialized
               self.initializeProject()
           )
           .catch((err) ->
@@ -90,10 +90,14 @@ module.exports =
       @errorsView = new ErrorsView(params)
 
     onProjectPathChanged: ->
-      if util.hasMavensMateProjectStructure() and not atom.workspace.mavensMateProjectInitialized
-        @initializeProject()
+      if util.hasMavensMateProjectStructure()
+          if not self.mavensMateProjectInitialized
+              @initializeProject()
+          else
+              console.log('project is already initialized')
       else
-        console.log('not a mavensmate project or already initialized')
+        self.mavensMateProjectInitialized ?= false
+        console.log('not a mavensmate project')
 
     initializeProject: ->
       self = @
@@ -171,7 +175,7 @@ module.exports =
       self.panel.addPanelViewItem('MavensMate initialized successfully. Happy coding!', 'success')
 
       # done
-      atom.workspace.mavensMateProjectInitialized ?= true
+      self.mavensMateProjectInitialized ?= true
 
     registerApplicationCommands: ->
       self = @
@@ -207,6 +211,7 @@ module.exports =
 
     registerProjectCommands: ->
       # attach commands to workspace based on commands.json
+      console.log('registering project commands');
       for c in util.getCommands('project')
         resolvedName = 'mavensmate:' + c.atomName
 
